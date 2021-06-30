@@ -46,7 +46,7 @@ export class Main extends Component {
                     listeners={({ navigation }) => ({
                         tabPress: event => {
                             event.preventDefault();
-                            navigation.navigate("wechat", {uid: firebase.auth().currentUser.uid})
+                            navigation.navigate("Message", {uid: firebase.auth().currentUser.uid})
                         }})}
                         options={{
                             tabBarIcon: ({ color, size }) => (

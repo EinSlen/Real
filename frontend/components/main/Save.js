@@ -54,7 +54,7 @@ export default function Save(props) {
                 likesCount: 0,
                 creation: firebase.firestore.FieldValue.serverTimestamp()
             }).then((function () {
-                props.navigation.popToTop()
+                props.navigation.navigate("Profile", {uid: firebase.auth().currentUser.uid})
             }))
     }
     return (

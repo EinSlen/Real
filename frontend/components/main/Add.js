@@ -93,7 +93,7 @@ export default function Add({ navigation }) {
 const styles = StyleSheet.create({
   cameraContainer: {
     flex: 1,
-    flexDirection: 'row'
+    flexDirection: 'row-reverse'
   },
   fixedRatio: {
     flex: 1,

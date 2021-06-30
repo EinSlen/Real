@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, Text, Image, FlatList, Button } from 'react-native'
+import { StyleSheet, View, Text, Image, FlatList, Button, TouchableHighlight } from 'react-native'
 
 import firebase from 'firebase'
 require('firebase/firestore')
 import { connect } from 'react-redux'
+import * as ImagePicker from 'expo-image-picker';
+
 
 function Profile(props) {
     const [userPosts, setUserPosts] = useState([]);
@@ -11,6 +13,8 @@ function Profile(props) {
     const [following, setFollowing] = useState(false);
     const [follower, setFollower] = useState(0);
     const [asfollower, setasFollower] = useState(0);
+    const [postSize, setPostSize] = useState(0);
+    const [image, setImage] = useState(null)
 
     useEffect(() => {
         const { currentUser, posts } = props;
@@ -26,6 +30,7 @@ function Profile(props) {
             .then(snapshot => {
                 setasFollower(snapshot.size);
             })
+            posts ? setPostSize(posts.length) : null
         }
         else {
             firebase.firestore()
@@ -53,6 +58,16 @@ function Profile(props) {
                         return { id, ...data }
                     })
                     setUserPosts(posts)
+                    posts ? setPostSize(posts.length) : null 
+                })
+
+                firebase.firestore().collection("following").doc(props.route.params.uid).collection("userFollowing").get()
+                .then(snapshot => {
+                    setFollower(snapshot.size);
+                })
+                firebase.firestore().collection("follower").doc(props.route.params.uid).collection("asFollower").get()
+                .then(snapshot => {
+                    setasFollower(snapshot.size);
                 })
         }
 
@@ -61,6 +76,7 @@ function Profile(props) {
         } else {
             setFollowing(false);
         }
+
 
     }, [props.route.params.uid, props.following])
 
@@ -99,15 +115,92 @@ function Profile(props) {
         firebase.auth().signOut();
     }
 
+    const trash = (downloadURL) => {
+        firebase.firestore()
+            .collection('posts')
+            .doc(firebase.auth().currentUser.uid)
+            .collection('userPosts')
+            .doc(downloadURL)
+            .delete()
+
+        console.log("delete : " + downloadURL)
+    }
+
+    const ChangeProfile = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+        console.log(result);
+      
+        if (!result.cancelled) {
+            setImage(result.uri);
+            const uri = image;
+            const childPath = `picture/${firebase.auth().currentUser.uid}/${Math.random().toString(36)}`;
+            console.log(childPath)
+
+            const response = await fetch(uri);
+            const blob = await response.blob();
+
+            const task = firebase
+                .storage()
+                .ref()
+                .child(childPath)
+                .put(blob);
+
+            const taskProgress = snapshot => {
+                console.log(`transferred: ${snapshot.bytesTransferred}`)
+            }
+
+            const taskCompleted = () => {
+                task.snapshot.ref.getDownloadURL().then((snapshot) => {
+                    savePostData(snapshot);
+                    console.log(snapshot)
+                })
+            }
+
+            const taskError = snapshot => {
+                console.log(snapshot)
+            }
+
+            task.on("state_changed", taskProgress, taskError, taskCompleted);
+        }
+    }
+
+    const savePostData = (downloadURL) => {
+
+        firebase.firestore()
+            .collection('users')
+            .doc(firebase.auth().currentUser.uid)
+            .set({
+                name: user.name,
+                email: user.email,
+                picture: downloadURL
+            })
+    }
+
     if (user === null) {
         return <View />
     }
+
     return (
+
         <View style={styles.container}>
             <View style={styles.containerInfo}>
+                {user.picture ? (
+                    <Image
+                        source={{uri: user.picture}}
+                        style={{width: 48, height: 48, borderRadius: 50}}
+                    />) : (
+                    <Image
+                        source={require('../../assets/friend.png')}
+                        style={{width: 48, height: 48, borderRadius: 50}}
+                    />
+                )}  
                 <Text>{user.name}</Text>
-                <Text>{user.email}</Text>
-
+                <Text>{user.email}</Text>              
                 {props.route.params.uid !== firebase.auth().currentUser.uid ? (
                     <View>
                         {following ? (
@@ -123,17 +216,23 @@ function Profile(props) {
                                 />
                             )}
                     </View>
-                ) :
+                ) : (
+                    <View>
+                        <Button
+                            title="Change profile picture"
+                            onPress={() => ChangeProfile()}
+                        />
+                
                     <Button
                         title="Logout"
                         onPress={() => onLogout()}
-                    />}
-            </View>
-
-            <View>
+                    />
+                    </View>
+                    )}
                 <Text>Following : {follower}</Text>
-                
                 <Text>Follower : {asfollower}</Text>
+                <Text>Posts: {postSize}</Text>
+
             </View>
 
             <View style={styles.containerGallery}>
@@ -142,14 +241,25 @@ function Profile(props) {
                     horizontal={false}
                     data={userPosts}
                     renderItem={({ item }) => (
+                        
                         <View
                             style={styles.containerImage}>
+                                {console.log(user.picture)}
 
                             <Image
                                 style={styles.image}
                                 source={{ uri: item.downloadURL }}
                             />
+
+                            <Image 
+                                source={require('../../assets/croix.png')}
+                                style={{flex: 1, width: 64, height: 64, margin: 2, alignItems: 'center', alignContent: 'center'}}
+                                onPress={() => trash(item)}
+                            />
+
                         </View>
+
+                        
 
                     )}
 
@@ -163,6 +273,7 @@ function Profile(props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        marginTop: 25
     },
     containerInfo: {
         margin: 20
@@ -177,6 +288,12 @@ const styles = StyleSheet.create({
     image: {
         flex: 1,
         aspectRatio: 1 / 1
+    },
+    picture: {
+        flex: 1,
+        width: 48,
+        height: 48,
+        borderRadius: 50
     }
 })
 const mapStateToProps = (store) => ({

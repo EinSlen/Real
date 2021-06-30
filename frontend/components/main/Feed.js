@@ -44,11 +44,18 @@ function Feed(props) {
     return (
         <View style={styles.container}>
             <View style={styles.containerGallery}>
-            {(posts === 0 ? null : (
+            <View style={styles.header}>
+                <Text style={{textAlign: 'left'}}>Real</Text>
+            </View>
+            {(posts.length === 0 ? (
                     <View style={styles.asPost}>
-                        <Text style={styles.HelpText}>USER</Text>
+                        <Text style={styles.HelpText}>Invitez ou rechercher des amis via la fonction</Text><Text onPress={() => props.navigation.navigate('Search')}>recherche</Text>
+                        <Image
+                            source={require('../../assets/friend.png')}
+                            style={styles.headerImage}
+                        />
                     </View>
-                )
+                ) : null
             )}
                 <FlatList
                     numColumns={1}
@@ -57,13 +64,11 @@ function Feed(props) {
                     renderItem={({ item }) => (
                         <View style={styles.containerImage}>
                             <Text style={styles.container}>{item.user.name}</Text>
-                            {console.log(item.user.email)}
                             <Image
                                 style={styles.image}
                                 source={{ uri: item.downloadURL }}
                                 roundedTop="lg"
                             />
-
                             { item.currentUserLike ?
                                 (
                                     <Button
@@ -83,7 +88,9 @@ function Feed(props) {
                                 )
                             }
 
+                                {item.size ? 
                                 <Text>Like : {item.size}</Text>
+                                : <Text>Like : 0</Text>}
 
                             <Text
                                 onPress={() => props.navigation.navigate('Comment', { postId: item.id, uid: item.user.uid })}>
@@ -101,8 +108,19 @@ function Feed(props) {
 }
 
 const styles = StyleSheet.create({
+    header: {
+        padding: 2
+    },
+    headerImage: {
+        flex: 1,
+        width: 256,
+        height: 256,
+        position: 'absolute',
+
+    },
     container: {
         flex: 1,
+        marginTop: 25
     },
     containerInfo: {
         margin: 20
@@ -125,17 +143,14 @@ const styles = StyleSheet.create({
             height: 3,
         },
         flex: 1,
-        color: '#ffa5004',
         shadowOpacity: 0.27,
         shadowRadius: 4.65,
         elevation: 6,
-        textAlign: 'center',
         padding: 5,
         margin: 15
     },
     HelpText: {
         fontSize: 20,
-        color: '#ff0000'
     }
 });
 

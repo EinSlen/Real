@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native'
 
 import firebase from 'firebase';
 require('firebase/firestore');
 
 export default function Search(props) {
     const [users, setUsers] = useState([])
+    const [modifyContent, setModifyContent] = useState(null);
 
     const fetchUsers = (search) => {
         firebase.firestore()
@@ -19,10 +20,11 @@ export default function Search(props) {
                     return { id, ...data }
                 });
                 setUsers(users);
-            })
+            });
+        setModifyContent(true)
     }
     return (
-        <View>
+        <View style={styles.container}>
             <TextInput
                 placeholder="Type Here..."
                 onChangeText={(search) => fetchUsers(search)} />
@@ -39,6 +41,16 @@ export default function Search(props) {
 
                 )}
             />
+            {modifyContent ? null :
+            (<Text>Content</Text>)
+            }
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        marginTop: 25
+    }
+})
