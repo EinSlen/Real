@@ -14,6 +14,7 @@ function Setting(props) {
     const [user, SetUser] = useState(null);
     const [image, setImage] = useState(null);
     const [nameValue, setNameValue] = useState(0);
+    const [bio, setBio] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -126,9 +127,16 @@ function Setting(props) {
             />
             
             <Text style={styles.text}>Your Email : </Text>
-            <Text style={{ fontSize: 16 }}>{user.email}</Text>
+            <TextInput
+                style={styles.textInputEmail}
+                placeholder={user.email}
+            />
             <Text style={styles.text}>Bio : </Text>
-            <TextInput style={styles.textInputBio}></TextInput>
+            <TextInput 
+                style={styles.textInputBio}
+                textAlignVertical='top'
+                placeholder='Place a bio'
+            />
 
             {error && <Text style={styles.error}>{error}</Text>}
             
@@ -159,8 +167,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         width: 150,
-        marginTop: 10,
-        
+        marginTop: 10
     },
     textInputBio: {
         fontSize: 16,
@@ -168,8 +175,17 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         height: 150,
+        marginTop: 10
+
+    },
+    textInputEmail: {
+        fontSize: 16,
+        borderColor: 'black',
+        borderWidth: 1,
+        borderRadius: 10,
+        width: 250,
+        height: 50,
         marginTop: 10,
-        
     },
     button: {
         height: 60, alignItems: 'flex-end'
