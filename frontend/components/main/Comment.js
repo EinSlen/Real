@@ -76,10 +76,21 @@ function Comment(props) {
                 data={comments}
                 renderItem={({ item }) => (
                     <View>
-                        {item.user !== undefined ?
-                            <Text>
-                                {item.user.name}
-                            </Text>
+                        {item.user !== undefined ? (
+                             item.user.picture ? (
+                                <Image
+                                    source={{uri: item.user.picture}}
+                                    style={{width: 48, height: 48, borderRadius: 50}}
+                                />) : (
+                                <Image
+                                    source={require('../../assets/friend.png')}
+                                    style={{width: 48, height: 48, borderRadius: 50}}
+                                />
+                                ),
+                                <Text>
+                                    {item.user.name}
+                                </Text>
+                        )
                             : null}
                         <Text>{item.text}</Text>
                     </View>

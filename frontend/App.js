@@ -10,8 +10,6 @@ import rootReducer from './redux/reducers'
 import thunk from 'redux-thunk'
 const store = createStore(rootReducer, applyMiddleware(thunk))
 
-
-
 const firebaseConfig = {
   apiKey: "AIzaSyBg67fTOeGJWvPBub9g7OYXrN4COIiZmyI",
   authDomain: "lgbtapp-34045.firebaseapp.com",
@@ -36,6 +34,7 @@ import MainScreen from './components/Main'
 import AddScreen from './components/main/Add'
 import SaveScreen from './components/main/Save'
 import CommentScreen from './components/main/Comment'
+import SettingScreen from './components/main/Setting'
 
 
 const Stack = createStackNavigator();
@@ -94,6 +93,7 @@ export class App extends Component {
               <Stack.Screen name="Main" component={MainScreen} />
               <Stack.Screen name="Save" component={SaveScreen} navigation={this.props.navigation}/>
               <Stack.Screen name="Comment" component={CommentScreen} navigation={this.props.navigation}/>
+              <Stack.Screen name="Setting" component={SettingScreen} navigation={this.props.navigation}/>
             </Stack.Navigator>
           </NavigationContainer>
         </Provider>
@@ -110,6 +110,7 @@ export class App extends Component {
             <Stack.Screen name="Add" component={AddScreen} navigation={this.props.navigation}/>
             <Stack.Screen name="Save" component={SaveScreen} navigation={this.props.navigation}/>
             <Stack.Screen name="Comment" component={CommentScreen} navigation={this.props.navigation}/>
+            <Stack.Screen name="Setting" component={SettingScreen} navigation={this.props.navigation}/>
           </Stack.Navigator>
         </NavigationContainer>
       </Provider>

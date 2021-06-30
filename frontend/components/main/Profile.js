@@ -4,7 +4,6 @@ import { StyleSheet, View, Text, Image, FlatList, Button, TouchableHighlight } f
 import firebase from 'firebase'
 require('firebase/firestore')
 import { connect } from 'react-redux'
-import * as ImagePicker from 'expo-image-picker';
 
 
 function Profile(props) {
@@ -14,7 +13,6 @@ function Profile(props) {
     const [follower, setFollower] = useState(0);
     const [asfollower, setasFollower] = useState(0);
     const [postSize, setPostSize] = useState(0);
-    const [image, setImage] = useState(null)
 
     useEffect(() => {
         const { currentUser, posts } = props;
@@ -126,61 +124,6 @@ function Profile(props) {
         console.log("delete : " + downloadURL)
     }
 
-    const ChangeProfile = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
-        console.log(result);
-      
-        if (!result.cancelled) {
-            setImage(result.uri);
-            const uri = image;
-            const childPath = `picture/${firebase.auth().currentUser.uid}/${Math.random().toString(36)}`;
-            console.log(childPath)
-
-            const response = await fetch(uri);
-            const blob = await response.blob();
-
-            const task = firebase
-                .storage()
-                .ref()
-                .child(childPath)
-                .put(blob);
-
-            const taskProgress = snapshot => {
-                console.log(`transferred: ${snapshot.bytesTransferred}`)
-            }
-
-            const taskCompleted = () => {
-                task.snapshot.ref.getDownloadURL().then((snapshot) => {
-                    savePostData(snapshot);
-                    console.log(snapshot)
-                })
-            }
-
-            const taskError = snapshot => {
-                console.log(snapshot)
-            }
-
-            task.on("state_changed", taskProgress, taskError, taskCompleted);
-        }
-    }
-
-    const savePostData = (downloadURL) => {
-
-        firebase.firestore()
-            .collection('users')
-            .doc(firebase.auth().currentUser.uid)
-            .set({
-                name: user.name,
-                email: user.email,
-                picture: downloadURL
-            })
-    }
-
     if (user === null) {
         return <View />
     }
@@ -192,15 +135,14 @@ function Profile(props) {
                 {user.picture ? (
                     <Image
                         source={{uri: user.picture}}
-                        style={{width: 48, height: 48, borderRadius: 50}}
+                        style={{width: 48, height: 48, borderRadius: 50, }}
                     />) : (
                     <Image
                         source={require('../../assets/friend.png')}
                         style={{width: 48, height: 48, borderRadius: 50}}
                     />
                 )}  
-                <Text>{user.name}</Text>
-                <Text>{user.email}</Text>              
+                <Text>{user.name}</Text>        
                 {props.route.params.uid !== firebase.auth().currentUser.uid ? (
                     <View>
                         {following ? (
@@ -218,9 +160,10 @@ function Profile(props) {
                     </View>
                 ) : (
                     <View>
+                        
                         <Button
-                            title="Change profile picture"
-                            onPress={() => ChangeProfile()}
+                            title="Setting"
+                            onPress={() => props.navigation.navigate("Setting", {uid: user.id})}
                         />
                 
                     <Button
@@ -242,9 +185,7 @@ function Profile(props) {
                     data={userPosts}
                     renderItem={({ item }) => (
                         
-                        <View
-                            style={styles.containerImage}>
-                                {console.log(user.picture)}
+                        <View style={styles.containerImage}>
 
                             <Image
                                 style={styles.image}
