@@ -12,14 +12,15 @@ export class Register extends Component {
             email: '',
             password: '',
             name: '',
-            picture: null
+            picture: null,
+            bio: "You don't have a biography"
         }
 
         this.onSignUp = this.onSignUp.bind(this)
     }
 
     onSignUp() {
-        const { email, password, name, picture } = this.state;
+        const { email, password, name, picture, bio } = this.state;
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((result) => {
                 firebase.firestore().collection("users")
@@ -27,7 +28,8 @@ export class Register extends Component {
                     .set({
                         name,
                         email,
-                        picture
+                        picture,
+                        bio
                     })
                 console.log(result)
             })

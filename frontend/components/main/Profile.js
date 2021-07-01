@@ -75,8 +75,7 @@ function Profile(props) {
             setFollowing(false);
         }
 
-
-    }, [props.route.params.uid, props.following])
+    })
 
     const onFollow = () => {
         firebase.firestore()
@@ -109,10 +108,6 @@ function Profile(props) {
             .delete()
     }
 
-    const onLogout = () => {
-        firebase.auth().signOut();
-    }
-
     const trash = (downloadURL) => {
         firebase.firestore()
             .collection('posts')
@@ -142,7 +137,10 @@ function Profile(props) {
                         style={{width: 48, height: 48, borderRadius: 50}}
                     />
                 )}  
-                <Text>{user.name}</Text>        
+                <Text>{user.name}</Text>
+                {(user.bio === '' || user.bio == null) ? 
+                    (<Text>You don't have a bio</Text>) 
+                    : (<Text>{user.bio}</Text>)}        
                 {props.route.params.uid !== firebase.auth().currentUser.uid ? (
                     <View>
                         {following ? (
@@ -165,11 +163,6 @@ function Profile(props) {
                             title="Setting"
                             onPress={() => props.navigation.navigate("Setting", {uid: user.id})}
                         />
-                
-                    <Button
-                        title="Logout"
-                        onPress={() => onLogout()}
-                    />
                     </View>
                     )}
                 <Text>Following : {follower}</Text>
@@ -199,8 +192,6 @@ function Profile(props) {
                             />
 
                         </View>
-
-                        
 
                     )}
 

@@ -13,9 +13,13 @@ function Setting(props) {
 
     const [user, SetUser] = useState(null);
     const [image, setImage] = useState(null);
-    const [nameValue, setNameValue] = useState(0);
-    const [bio, setBio] = useState(null);
-    const [error, setError] = useState(null);
+    const [nameValue, setNameValue] = useState("");
+    const [imageComplet, setImageComplet] = useState(null);
+    const [bio, setBio] = useState("");
+    const [error, setError] = useState("");
+    const [imageError, setImageError] = useState(null);
+    const [nameError, setNameError] = useState(null);
+    const [bioError, setBioError] = useState(null);
 
     useEffect(() => {
         firebase.firestore()
@@ -62,12 +66,15 @@ function Setting(props) {
             const taskCompleted = () => {
                 task.snapshot.ref.getDownloadURL().then((snapshot) => {
                     savePostData(snapshot);
+                    setImageComplet(snapshot);
                     console.log(snapshot)
                 })
             }
 
             const taskError = snapshot => {
                 console.log(snapshot)
+                setError(snapshot)
+                setImageError(true)
             }
 
             task.on("state_changed", taskProgress, taskError, taskCompleted);
@@ -82,8 +89,73 @@ function Setting(props) {
             .set({
                 name: user.name,
                 email: user.email,
-                picture: downloadURL
+                picture: downloadURL,
+                bio: user.bio
             })
+    }
+
+    const onLogout = () => {
+        firebase.auth().signOut();
+    }
+
+    const Submit = () => {
+
+        if(nameValue.length != 0 || bio.length != 0) {
+            if(nameValue.length < 5 || nameValue.length > 10) {
+                setError("Your name is too small or big.")
+                setNameError(true)
+                return
+            }
+
+            if(bio.length > 100) {
+                setError("Your biography is too big.")
+                setBioError(true)
+                return
+            }
+
+            if((nameValue.length != 0 && bio.length === 0) && !nameError && !bioError) {
+                firebase.firestore()
+                .collection("users")
+                .doc(firebase.auth().currentUser.uid)
+                .set({
+                    name: nameValue,
+                    email: user.email,
+                    picture: user.picture,
+                    bio: user.bio
+                }).then(() => {
+                    props.navigation.navigate("Profile", {uid: firebase.auth().currentUser.uid})
+                })
+            }
+
+            if((nameValue.length === 0 && bio.length != 0) && !nameError && !bioError) {
+                firebase.firestore()
+                .collection("users")
+                .doc(firebase.auth().currentUser.uid)
+                .set({
+                    name: user.name,
+                    email: user.email,
+                    picture: user.picture,
+                    bio: bio
+                }).then(() => {
+                    props.navigation.navigate("Profile", {uid: firebase.auth().currentUser.uid})
+                })
+            }
+
+            if((nameValue.length != 0 && bio.length != 0) && !nameError && !bioError) {
+                firebase.firestore()
+                .collection("users")
+                .doc(firebase.auth().currentUser.uid)
+                .set({
+                    name: nameValue,
+                    email: user.email,
+                    picture: user.picture,
+                    bio: bio
+                }).then(() => {
+                    props.navigation.navigate("Profile", {uid: firebase.auth().currentUser.uid})
+                })
+            }
+        }
+
     }
 
     if (user === null) {
@@ -101,18 +173,24 @@ function Setting(props) {
                 />
             </TouchableOpacity>
             <Text style={styles.headerText}>Profile {user.name}</Text>
+            <TouchableOpacity style={styles.logoutButton}>
+                <Button
+                    title="Logout"
+                    onPress={() => onLogout()}
+                />
+            </TouchableOpacity>
             <View style={styles.container}>
              {user.picture ? (
                     <Image
                         source={{uri: user.picture}}
-                        style={{width: 48, height: 48, borderRadius: 10, position: 'absolute', margin: 20}}
+                        style={{width: 64, height: 64, borderRadius: 10, position: 'absolute', margin: 20}}
                     />) : (
                     <Image
                         source={require('../../assets/friend.png')}
-                        style={{width: 48, height: 48, borderRadius: 10, position: 'absolute', margin: 20}}
+                        style={{width: 64, height: 64, borderRadius: 10, position: 'absolute', margin: 20}}
                     />
                 )}
-
+            <Text>{imageComplet}</Text>
             <TouchableOpacity style={styles.button}>
                 <Button
                     title="Change profile picture"
@@ -124,25 +202,26 @@ function Setting(props) {
                 placeholder={user.name}
                 style={styles.textInput}
                 maxLength={15}
+                onChangeText={(nametext) => setNameValue(nametext)}
             />
             
             <Text style={styles.text}>Your Email : </Text>
-            <TextInput
-                style={styles.textInputEmail}
-                placeholder={user.email}
-            />
+            <Text>{user.email}</Text>
             <Text style={styles.text}>Bio : </Text>
             <TextInput 
                 style={styles.textInputBio}
                 textAlignVertical='top'
                 placeholder='Place a bio'
+                onChangeText={(biotext) => setBio(biotext)}
             />
 
-            {error && <Text style={styles.error}>{error}</Text>}
+            {(nameError || bioError || imageError) ? (<Text style={styles.error}>{error}</Text>) : null}
+
             
             <TouchableOpacity style={{ marginTop: 50}}>
                 <Button
                     title='Submit'
+                    onPress={() => Submit()}
                 />
             </TouchableOpacity>
             </View>
@@ -188,7 +267,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     button: {
-        height: 60, alignItems: 'flex-end'
+        height: 60, 
+        alignItems: 'flex-end'
     },
     headerText: {
         fontSize: 20,
@@ -196,7 +276,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 35,
-        right: '50%', 
+        right: '40%', 
     },
     text: {
         marginTop: 25,
@@ -207,6 +287,16 @@ const styles = StyleSheet.create({
         color: 'red',
         justifyContent: 'center',
         alignItems: 'center',
+        paddingTop: 20
+    },
+    logoutButton: {
+        width: 120, 
+        fontSize: 20,
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 35,
+        right: 0
     }
 })
 
