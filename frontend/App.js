@@ -46,6 +46,7 @@ export class App extends Component {
     this.state = {
       loaded: false,
     }
+    console.disableYellowBox = true; 
   }
 
   componentDidMount() {

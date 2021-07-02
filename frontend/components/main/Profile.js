@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, Text, Image, FlatList, Button, TouchableHighlight } from 'react-native'
+import { StyleSheet, View, Text, Image, FlatList, Button, TouchableOpacity } from 'react-native'
 
 import firebase from 'firebase'
 require('firebase/firestore')
@@ -38,6 +38,9 @@ function Profile(props) {
                 .then((snapshot) => {
                     if (snapshot.exists) {
                         setUser(snapshot.data());
+                        setTimeout(() => {
+                            setUser(snapshot.data())
+                        }, 1500)
                     }
                     else {
                         console.log('does not exist')
@@ -74,8 +77,7 @@ function Profile(props) {
         } else {
             setFollowing(false);
         }
-
-    })
+    }, [])
 
     const onFollow = () => {
         firebase.firestore()
@@ -113,7 +115,7 @@ function Profile(props) {
             .collection('posts')
             .doc(firebase.auth().currentUser.uid)
             .collection('userPosts')
-            .doc(downloadURL)
+            .doc(downloadURL.uid)
             .delete()
 
         console.log("delete : " + downloadURL)
@@ -127,20 +129,20 @@ function Profile(props) {
 
         <View style={styles.container}>
             <View style={styles.containerInfo}>
-                {user.picture ? (
-                    <Image
-                        source={{uri: user.picture}}
-                        style={{width: 48, height: 48, borderRadius: 50, }}
-                    />) : (
-                    <Image
-                        source={require('../../assets/friend.png')}
-                        style={{width: 48, height: 48, borderRadius: 50}}
-                    />
-                )}  
-                <Text>{user.name}</Text>
-                {(user.bio === '' || user.bio == null) ? 
-                    (<Text>You don't have a bio</Text>) 
-                    : (<Text>{user.bio}</Text>)}        
+                    {user.picture ? (
+                        <Image
+                            source={{uri: user.picture}}
+                            style={{width: 48, height: 48, borderRadius: 50, }}
+                        />) : (
+                        <Image
+                            source={require('../../assets/friend.png')}
+                            style={{width: 48, height: 48, borderRadius: 50}}
+                        />
+                    )}  
+                    <Text>{user.name}</Text>
+                    {(user.bio === '' || user.bio == null) ? 
+                        (<Text>You don't have a bio</Text>) 
+                        : (<Text>{user.bio}</Text>)}        
                 {props.route.params.uid !== firebase.auth().currentUser.uid ? (
                     <View>
                         {following ? (
@@ -185,11 +187,15 @@ function Profile(props) {
                                 source={{ uri: item.downloadURL }}
                             />
 
-                            <Image 
-                                source={require('../../assets/croix.png')}
-                                style={{flex: 1, width: 64, height: 64, margin: 2, alignItems: 'center', alignContent: 'center'}}
+                            <TouchableOpacity
                                 onPress={() => trash(item)}
-                            />
+                                style={styles.opacityEdit}
+                            >
+                                <Image 
+                                    source={require('../../assets/edit.png')}
+                                    style={styles.imageEdit}
+                                />
+                            </TouchableOpacity>
 
                         </View>
 
@@ -211,7 +217,8 @@ const styles = StyleSheet.create({
         margin: 20
     },
     containerGallery: {
-        flex: 1
+        flex: 1,
+        backgroundColor: 'black'
     },
     containerImage: {
         flex: 1 / 3
@@ -219,13 +226,31 @@ const styles = StyleSheet.create({
     },
     image: {
         flex: 1,
-        aspectRatio: 1 / 1
+        aspectRatio: 1 / 1,
+        margin: 5,
+        borderRadius: 10
     },
     picture: {
         flex: 1,
         width: 48,
         height: 48,
         borderRadius: 50
+    },
+    imageEdit: {
+        width: '90%', 
+        height: '90%', 
+        opacity: 0.4, 
+        flex: 1, 
+        marginTop: 5, 
+        marginLeft: 5, 
+        borderBottomRightRadius: 10, 
+        borderTopLeftRadius: 10
+    },
+    opacityEdit: {
+        width: '50%', 
+        height: '50%', 
+        position: 'absolute', 
+        shadowColor: 'gray'
     }
 })
 const mapStateToProps = (store) => ({

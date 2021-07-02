@@ -101,19 +101,15 @@ function Setting(props) {
     const Submit = () => {
 
         if(nameValue.length != 0 || bio.length != 0) {
-            if(nameValue.length < 5 || nameValue.length > 10) {
-                setError("Your name is too small or big.")
-                setNameError(true)
-                return
-            }
-
-            if(bio.length > 100) {
-                setError("Your biography is too big.")
-                setBioError(true)
-                return
-            }
 
             if((nameValue.length != 0 && bio.length === 0) && !nameError && !bioError) {
+
+                if(nameValue.length < 5 || nameValue.length > 10) {
+                    setError("Your name is too small or big.")
+                    setNameError(true)
+                    return
+                }
+
                 firebase.firestore()
                 .collection("users")
                 .doc(firebase.auth().currentUser.uid)
@@ -128,6 +124,13 @@ function Setting(props) {
             }
 
             if((nameValue.length === 0 && bio.length != 0) && !nameError && !bioError) {
+
+                if(bio.length > 100) {
+                    setError("Your biography is too big.")
+                    setBioError(true)
+                    return
+                }
+                
                 firebase.firestore()
                 .collection("users")
                 .doc(firebase.auth().currentUser.uid)
@@ -142,6 +145,19 @@ function Setting(props) {
             }
 
             if((nameValue.length != 0 && bio.length != 0) && !nameError && !bioError) {
+
+                if(nameValue.length < 5 || nameValue.length > 10) {
+                    setError("Your name is too small or big.")
+                    setNameError(true)
+                    return
+                }
+    
+                if(bio.length > 100) {
+                    setError("Your biography is too big.")
+                    setBioError(true)
+                    return
+                }
+
                 firebase.firestore()
                 .collection("users")
                 .doc(firebase.auth().currentUser.uid)
@@ -216,7 +232,6 @@ function Setting(props) {
             />
 
             {(nameError || bioError || imageError) ? (<Text style={styles.error}>{error}</Text>) : null}
-
             
             <TouchableOpacity style={{ marginTop: 50}}>
                 <Button
