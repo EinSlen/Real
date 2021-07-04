@@ -60,14 +60,13 @@ function Setting(props) {
                 .put(blob);
 
             const taskProgress = snapshot => {
-                console.log(`transferred: ${snapshot.bytesTransferred}`)
+                setImageComplet(snapshot.bytesTransferred + "%");
             }
 
             const taskCompleted = () => {
                 task.snapshot.ref.getDownloadURL().then((snapshot) => {
                     savePostData(snapshot);
-                    setImageComplet(snapshot);
-                    console.log(snapshot)
+                    setImageComplet(null);
                 })
             }
 

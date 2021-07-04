@@ -38,9 +38,6 @@ function Profile(props) {
                 .then((snapshot) => {
                     if (snapshot.exists) {
                         setUser(snapshot.data());
-                        setTimeout(() => {
-                            setUser(snapshot.data())
-                        }, 1500)
                     }
                     else {
                         console.log('does not exist')
