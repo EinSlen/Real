@@ -10,16 +10,6 @@ import rootReducer from './redux/reducers'
 import thunk from 'redux-thunk'
 const store = createStore(rootReducer, applyMiddleware(thunk))
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBg67fTOeGJWvPBub9g7OYXrN4COIiZmyI",
-  authDomain: "lgbtapp-34045.firebaseapp.com",
-  projectId: "lgbtapp-34045",
-  storageBucket: "lgbtapp-34045.appspot.com",
-  messagingSenderId: "74881801169",
-  appId: "1:74881801169:web:31b25448bb0781a6941ef0",
-  measurementId: "G-MX35EGF456"
-};
-
 if (firebase.apps.length === 0) {
   firebase.initializeApp(firebaseConfig)
 }
