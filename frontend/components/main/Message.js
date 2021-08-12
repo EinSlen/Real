@@ -7,7 +7,16 @@ import { connect } from 'react-redux'
 function Message() {
     return (
         <View>
-            <Text>YAYa</Text>
+            <Text>Message : </Text>
+        {currentUser.downloadURL ? 
+            <Image 
+                style={width: 50, height: 200,resizeMode: 'stretch'}
+                source={currentUser.downloadURL}/> :
+            <Image
+                style={width: 50, height: 200,resizeMode: 'stretch'}
+                source={require="../../assets/friends.png"}/>}
+                    
+            <Text>{currentUser.username} : {currentUser.message[0]}</Text>
         </View>
     )
 }
